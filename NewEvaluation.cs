@@ -44,7 +44,7 @@ public class NewEvaluation
         {
             field_clone[pos.x, pos.y] = 1;
         }
-        CheckLine(field, ref completeLine);
+        CheckLine(field_clone, ref completeLine);
 
 
 

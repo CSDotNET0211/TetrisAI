@@ -147,7 +147,7 @@ public class TetrisEnvironment
 
     #endregion
     static List<int> completeLineHeight = new List<int>();
-
+    static private readonly MinoKind[] Mino7Bag = new MinoKind[7] { MinoKind.I, MinoKind.J, MinoKind.L, MinoKind.O, MinoKind.S, MinoKind.T, MinoKind.Z };
     static public void Print(int[,] field, Vector2[] positions, bool wait)
     {
         Console.Clear();
@@ -1119,7 +1119,7 @@ public class TetrisEnvironment
         return true;
     }
 
-    static public void CheckLine(int[,] field)
+    static public int CheckLine(int[,] field)
     {
         completeLineHeight.Clear();
 
@@ -1140,9 +1140,11 @@ public class TetrisEnvironment
         {
             DownLine(field, y);
         }
+
+        return completeLineHeight.Count;
     }
 
-    static public void DownLine(int[,] field, int y)
+    static private void DownLine(int[,] field, int y)
     {
         for (; y < 25 - 1; y++)
         {
@@ -1157,4 +1159,85 @@ public class TetrisEnvironment
         }
     }
 
+    static private MinoKind GetNextMino(List<MinoKind> left)
+    {
+        if (left.Count == 0)
+            left.AddRange(Mino7Bag);
+
+        Random random = new Random();
+        int index = random.Next(0, left.Count);
+        MinoKind returnValue = left[index];
+        left.RemoveAt(index);
+
+        return returnValue;
+    }
+
+    /// <summary>
+    /// ネクストを更新して新しいミノを返します。
+    /// </summary>
+    /// <param name="nexts">ネクスト</param>
+    /// <param name="left">ネクストのバッグ</param>
+    /// <returns>新しいミノ</returns>
+
+    static public MinoKind UpdateNexts(MinoKind[] nexts, List<MinoKind> left)
+    {
+        var returnValue = nexts[0];
+
+        for (int i = 0; i < nexts.Length - 1; i++)
+        {
+            nexts[i] = nexts[i + 1];
+        }
+        nexts[nexts.Length - 1] = GetNextMino(left);
+
+        return returnValue;
+    }
+
+    static public void UpdateScore(int clearedLine, int ren/*tspin*/, ref int nowScore, bool BacktoBack)
+    {
+        #region Score
+        const int SINGLE = 100;
+        const int DOUBLE = 300;
+        const int TRIPLE = 500;
+        const int TETRIS = 800;
+        const int TSPINMINI = 100;
+        const int TSPIN = 400;
+        const int TSPINMINISINGLE = 200;
+        const int TSPINMINIDOUBLE = 400;
+        const int TSPINSINGLE = 800;
+        const int TSPINDOUBLE = 1200;
+        const int TSPINTRIPLE = 1600;
+        const int COMBO = 50;
+        const int HARDDROP = 2;
+        const int SOFTDROP = 1;
+        const float BACKTOBACK = 1.5f;
+        const int PERFECTCLEAR = 2000;
+        #endregion
+
+
+        nowScore += COMBO * ren;
+        float ajust;
+        if (BacktoBack)
+            ajust = BACKTOBACK;
+        else
+            ajust = 1;
+
+        switch (clearedLine)
+        {
+            case 0:
+                break;
+            case 1:
+                nowScore += SINGLE;
+                break;
+            case 2:
+                nowScore += DOUBLE;
+                break;
+            case 3:
+                nowScore += TRIPLE;
+                break;
+            case 4:
+                nowScore += (int)(TETRIS * ajust);
+                break;
+                default:throw new Exception();
+        }
+    }
 }

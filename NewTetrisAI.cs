@@ -41,6 +41,9 @@ public class NewTetrisAI
 
     }
 
+    /// <summary>
+    /// 初期化
+    /// </summary>
     static void Init()
     {
         _finalWays = null;
@@ -150,6 +153,17 @@ public class NewTetrisAI
 
 
     }
+    /// <summary>
+    /// 再帰してミノの配置を全列挙
+    /// 負荷削減のために、一度右移動した方向のみにしか移動は不可、回転はあらかじめやっておく
+    /// </summary>
+    /// <param name="mino">現在のテトリミノ</param>
+    /// <param name="field">現在の盤面</param>
+    /// <param name="move">今までの移動履歴を収納（ホールドやネクストを含む）</param>
+    /// <param name="hashset">重複検知用のDictionary、hashsetではない</param>
+    /// <param name="movecount">今までの移動カウント、回転も含む、ホールドも含むはず【要】</param>
+    /// <param name="beforeHorizontal">前の移動と反対側に移動できないようにするための前の横移動履歴収納</param>
+    /// <param name="beforeEval">前のミノ設置の評価、一部継続させないと一番最後のスコアだけが反映されてしまう</param>
     static private void SearchPattern(
         TetrisEnvironment.Mino mino,
         int[,] field,
@@ -179,7 +193,7 @@ public class NewTetrisAI
             mino_clone.positions[2] += new TetrisEnvironment.Vector2(0, count);
             mino_clone.positions[3] += new TetrisEnvironment.Vector2(0, count);
 
-            //順番を整列
+            //ハッシュのため順番を整列
             for (int i = 1; i < 4; i++)
             {
                 if (mino_clone.positions[i].x < mino_clone.positions[i - 1].x)
